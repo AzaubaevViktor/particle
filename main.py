@@ -2,7 +2,7 @@ import sys, pygame
 from itertools import product
 
 from particle import Particle
-from simmetric_dict import SDict
+from simmetric_dict import Dict
 from time import time
 
 pygame.init()
@@ -20,7 +20,7 @@ particles = [Particle(screen, x*1j + y) for x, y in product(range(50, 65, 5), ra
 # particles += [Particle(screen, 0.5, speed=500j+500)]
 
 
-F = SDict()
+F = Dict(particles)
 dT = 0.001
 
 p_sec = time()
@@ -39,11 +39,11 @@ while 1:
     for a in particles:
         for b in particles:
             if a != b:
-                if (a, b) not in F:
+                if id(a) < id(b):
                     F[(a, b)] = a.F(b)
 
     for p in particles:
-        EF = sum([v for v in F.values_by(p)])
+        EF = sum(F.values_by(p))
         p.add(EF, dT)
         p.move(dT)
 

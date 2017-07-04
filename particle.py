@@ -20,6 +20,14 @@ def _F(r: complex, charge: int):
 
 
 class Particle:
+    _ID = 0
+
+    def __new__(cls, *args, **kwargs):
+        cls._ID += 1
+        self = super(Particle, cls).__new__(cls)
+        self.id = cls._ID
+        return self
+
     def __init__(self, screen, pos: complex, charge: int = 1, speed: complex = 0):
         self.screen = screen
         self.pos = pos
@@ -40,4 +48,7 @@ class Particle:
         pygame.draw.circle(self.screen, WHITE,
                            (int(self.pos.real * 4), int(self.pos.imag * 4)),
                            3)
+
+    def __lt__(self, other: "Particle"):
+        return self.id < other.id
 
