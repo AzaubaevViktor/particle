@@ -12,6 +12,13 @@ def normalize(z):
     return z / abs(z)
 
 
+def _F(r: complex, charge: int):
+    coulumb = coulumb_k * charge / abs(r) ** 2
+    repulshion = repulshion_k / abs(r)
+
+    return (coulumb - repulshion) * normalize(r)
+
+
 class Particle:
     def __init__(self, screen, pos: complex, charge: int = 1, speed: complex = 0):
         self.screen = screen
@@ -21,10 +28,7 @@ class Particle:
 
     def F(self, p: "Particle"):
         d = (self.pos - p.pos)
-        coulumb = coulumb_k * self.charge * p.charge / abs(d) ** 2
-        repulshion = repulshion_k / abs(d)
-
-        return (coulumb - repulshion) * normalize(d)
+        return _F(d, self.charge * p.charge)
 
     def add(self, F, dT):
         self.speed += F * dT
