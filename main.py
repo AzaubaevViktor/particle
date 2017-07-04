@@ -4,10 +4,11 @@ from itertools import product
 from particle import Particle
 from simmetric_dict import Dict
 from time import time
+from random import random
 
 pygame.init()
 
-size = width, height = 640, 480
+size = width, height = 1800, 1000
 speed = [2, 2]
 black = 0, 0, 0
 
@@ -15,13 +16,21 @@ screen = pygame.display.set_mode(size)
 
 WHITE = (255, 255, 255)
 
-particles = [Particle(screen, x*1j + y) for x, y in product(range(50, 65, 5), range(50, 65, 5))]
+particles = [Particle(screen, x*1j + y, speed=30) for x, y in product(range(200, 235, 5), range(200, 235, 5))]
 
-# particles += [Particle(screen, 0.5, speed=500j+500)]
+particles += [Particle(screen, x*1j + y + 1, speed=-30) for x, y in product(range(200, 235, 5), range(350, 385, 5))]
 
+
+particles += [Particle(screen, 0.5, speed=10j+10)]
+
+particles += [
+    Particle(screen, 71j + 70, speed=1j),
+    Particle(screen, 71j + 80, speed=-1j)
+
+]
 
 F = Dict(particles)
-dT = 0.001
+dT = 0.05
 
 p_sec = time()
 t2 = time()
