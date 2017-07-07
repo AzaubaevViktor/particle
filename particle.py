@@ -78,13 +78,24 @@ class Particle:
         return _F(d, self.charge * p.charge)
 
     def add(self, F, dT):
+        self._F = F
         self.speed += F * dT
 
     def move(self, dT):
         self.pos += self.speed * dT
 
+    @property
+    def color(self):
+        speed_d = abs(self.speed)
+        force_d = abs(self._F) * 10
+        R = 255 - force_d
+        G = 255 - speed_d
+        B = 255 - speed_d - force_d
+        return tuple(int(max(0, component)) for component in (R, G, B))
+
     def draw(self):
-        pygame.draw.circle(self.screen, WHITE,
+        print(self.color)
+        pygame.draw.circle(self.screen, self.color,
                            (int(self.pos.real * draw_k), int(self.pos.imag * draw_k)),
                            2)
 
