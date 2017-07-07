@@ -1,9 +1,11 @@
 import pygame
 import sys
 
-from world import World, SingleGenerator, RectGenerator
+from world import World, SingleGenerator, RectGenerator, Circle4Generator
 
-world = World()
+world = World(
+    friction=0
+)
 
 world.add_particles(
     SingleGenerator(100+100j, 1)
@@ -14,11 +16,20 @@ world.add_particles(
 )
 
 world.add_particles(
-    RectGenerator(
+    Circle4Generator(
         500 + 500j,
-        600 + 550j,
-        0.2,
-        10
+        10,
+        0.5,
+        30
+    )
+)
+
+world.add_particles(
+    Circle4Generator(
+        700 + 500j,
+        10,
+        0.8,
+        -30
     )
 )
 

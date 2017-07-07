@@ -1,10 +1,9 @@
 from itertools import combinations
 from typing import Callable, List
 
-import pygame
-
 stable_point = 5
 max_value = 1
+max_force = 10
 
 repulshion_k = 4 * stable_point * max_value
 coulumb_k = repulshion_k * stable_point
@@ -48,6 +47,8 @@ def precalc():
             dlk = ra - key_left * dr
             drk = key_right * dr - ra
             v = data[key_left] * dlk + data[key_right] * drk
+        elif 0 == key_left:
+            return -max_force
         else:
             v = __F(ra, 1)
 

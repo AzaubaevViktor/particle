@@ -85,3 +85,29 @@ class RectGenerator:
                 yield Particle(x + y*1j, speed=self.speed)
                 y += self.step
             x += self.step
+
+
+class Circle4Generator:
+    sin60 = 3 ** 0.5 * 0.5
+    cos60 = 0.5
+    sin30 = cos60
+    cos30 = sin60
+
+    def __init__(self,
+                 center: complex,
+                 diameter: float,
+                 density: float,
+                 speed_linear: complex,
+                 ):
+        self.center = center
+        self.diameter = diameter
+        self.density = density
+        self.speed_linear = speed_linear
+
+    def __iter__(self):
+        diag = self.diameter * (1 + 1j)
+        r = RectGenerator(self.center - diag, self.center + diag, self.density, self.speed_linear)
+        for particle in r:
+            if abs(particle.pos - self.center) < self.diameter:
+                yield particle
+
