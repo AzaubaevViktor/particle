@@ -32,6 +32,8 @@ class World:
         self.particles.calc_forces(force_func)
         # set forces
         self.particles.step(self.dT, self.speed_k)
+        # wall
+        # self.particles.wall(self.width, self.height)
 
     def particle_color(self, particle: Particle):
         speed_d = abs(particle.speed)

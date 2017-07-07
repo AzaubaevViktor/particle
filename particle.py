@@ -64,7 +64,7 @@ draw_k = 2
 
 class Particles:
     def __init__(self):
-        self.list = []
+        self.list = []  # type: List[Particle]
         self._F = {}
 
     def calc_forces(self, func: Callable):
@@ -97,6 +97,31 @@ class Particles:
             self._F[particle][p] = 0
 
         self.list.append(particle)
+
+    def wall(self, max_x, max_y):
+        for particle in self.list:
+            c = particle.pos
+            x = c.real
+            y = c.imag
+            vx = particle.speed.real
+            vy = particle.speed.imag
+
+            if 0 > x:
+                x = -x
+                vx = -vx
+            if 0 > y:
+                y = -y
+                vy = -vy
+            if x > max_x:
+                x = max_x - x
+                vx = -vx
+            if y > max_y:
+                y = max_y - y
+                vy = -vy
+
+            particle.pos = x + y * 1j
+            particle.speed = vx + vy * 1j
+
 
     def __iter__(self):
         return iter(self.list)
