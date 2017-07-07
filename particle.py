@@ -1,9 +1,12 @@
-import cmath
-
 import pygame
 
-coulumb_k = 256
-repulshion_k = 3*16
+stable_point = 5
+max_value = 2.25
+
+repulshion_k = 4 * stable_point * max_value
+coulumb_k = repulshion_k * stable_point
+
+print(repulshion_k, coulumb_k)
 
 WHITE = (255, 255, 255)
 
@@ -23,25 +26,26 @@ def precalc():
 
     dr = 0.1
     to = 200
-    data = {}
+    data = [0 for _ in range(int(to / dr))]
 
     for r in range(1, int(to / dr)):
         data[r] = __F(r * dr, 1)
 
+    max_index = len(data)
+
     def _F(r: complex, charge: int):
         ra = abs(r)
-        ra = 0.1 if 0 == ra else ra
+        ra = dr if 0 == ra else ra
 
         key_left = int(ra / dr)
         key_right = key_left + 1
 
-        dlk = ra - key_left * dr
-        drk = key_right * dr - ra
-
-        if key_right not in data or key_left == 0:
-            v = __F(ra, 1)
-        else:
+        if 0 < key_left < max_index - 1:
+            dlk = ra - key_left * dr
+            drk = key_right * dr - ra
             v = data[key_left] * dlk + data[key_right] * drk
+        else:
+            v = __F(ra, 1)
 
         return v * normalize(r)
 
@@ -52,6 +56,7 @@ _F = precalc()
 
 
 draw_k = 2
+
 
 class Particle:
     _ID = 0
