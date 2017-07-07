@@ -1,3 +1,6 @@
+from itertools import combinations
+from typing import Callable, List
+
 import pygame
 
 stable_point = 5
@@ -33,7 +36,8 @@ def precalc():
 
     max_index = len(data)
 
-    def _F(r: complex, charge: int):
+    def _F(p1: "Particle", p2: "Particle"):
+        r = p1.pos - p2.pos
         ra = abs(r)
         ra = dr if 0 == ra else ra
 
@@ -52,10 +56,50 @@ def precalc():
     return _F
 
 
-_F = precalc()
+force_func = precalc()
 
 
 draw_k = 2
+
+
+class Particles:
+    def __init__(self):
+        self.list = []
+        self._F = {}
+
+    def calc_forces(self, func: Callable):
+        """
+
+        :param func: function(particle, particle) -> complex
+        :return:
+        """
+        for p1, p2 in combinations(self.list, 2):
+            F = func(p1, p2)
+            self._F[p1][p2] = F
+            self._F[p2][p1] = -F
+
+    def step(self, dT):
+        for particle in self.list:
+            particle.F = sum(self._F[particle].values())
+            particle.apply_force(dT)
+            particle.move(dT)
+
+    def add(self, particles: List["Particle"]):
+        for particle in particles:
+            self.add_single(particle)
+
+    def add_single(self, particle: "Particle"):
+        for key in self._F:
+            self._F[key][particle] = 0
+
+        self._F[particle] = {}
+        for p in self.list:
+            self._F[particle][p] = 0
+
+        self.list.append(particle)
+
+    def __iter__(self):
+        return iter(self.list)
 
 
 class Particle:
@@ -67,37 +111,29 @@ class Particle:
         self.id = cls._ID
         return self
 
-    def __init__(self, screen, pos: complex, charge: int = 1, speed: complex = 0):
-        self.screen = screen
+    def __init__(self, pos: complex, charge: int = 1, speed: complex = 0):
         self.pos = pos
         self.charge = charge
         self.speed = speed
+        self._F = 0
 
     def F(self, p: "Particle"):
         d = (self.pos - p.pos)
-        return _F(d, self.charge * p.charge)
+        return force_func(d, self.charge * p.charge)
 
-    def add(self, F, dT):
-        self._F = F
-        self.speed += F * dT
+    @property
+    def F(self):
+        return self._F
+
+    @F.setter
+    def F(self, value):
+        self._F = value
+
+    def apply_force(self, dT):
+        self.speed += self._F * dT
 
     def move(self, dT):
         self.pos += self.speed * dT
-
-    @property
-    def color(self):
-        speed_d = abs(self.speed)
-        force_d = abs(self._F) * 10
-        R = 255 - force_d
-        G = 255 - speed_d
-        B = 255 - speed_d - force_d
-        return tuple(int(max(0, component)) for component in (R, G, B))
-
-    def draw(self):
-        print(self.color)
-        pygame.draw.circle(self.screen, self.color,
-                           (int(self.pos.real * draw_k), int(self.pos.imag * draw_k)),
-                           2)
 
     def __lt__(self, other: "Particle"):
         return self.id < other.id
