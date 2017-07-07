@@ -10,12 +10,13 @@ class World:
             height=1000,
             dT=0.05,
             draw_k=1,
-
+            friction=0.01
     ):
         self.width = width
         self.height = height
         self.dT = dT
         self.draw_k = draw_k
+        self.speed_k = 1 - friction
 
         pygame.init()
 
@@ -30,7 +31,7 @@ class World:
         # calc forces
         self.particles.calc_forces(force_func)
         # set forces
-        self.particles.step(self.dT)
+        self.particles.step(self.dT, self.speed_k)
 
     def particle_color(self, particle: Particle):
         speed_d = abs(particle.speed)

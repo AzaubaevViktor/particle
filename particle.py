@@ -4,7 +4,7 @@ from typing import Callable, List
 import pygame
 
 stable_point = 5
-max_value = 2.25
+max_value = 1
 
 repulshion_k = 4 * stable_point * max_value
 coulumb_k = repulshion_k * stable_point
@@ -78,10 +78,10 @@ class Particles:
             self._F[p1][p2] = F
             self._F[p2][p1] = -F
 
-    def step(self, dT):
+    def step(self, dT, speed_k):
         for particle in self.list:
             particle.F = sum(self._F[particle].values())
-            particle.apply_force(dT)
+            particle.apply_force(dT, speed_k=speed_k)
             particle.move(dT)
 
     def add(self, particles: List["Particle"]):
@@ -129,8 +129,9 @@ class Particle:
     def F(self, value):
         self._F = value
 
-    def apply_force(self, dT):
+    def apply_force(self, dT, speed_k):
         self.speed += self._F * dT
+        self.speed *= speed_k
 
     def move(self, dT):
         self.pos += self.speed * dT
