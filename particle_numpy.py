@@ -38,7 +38,7 @@ class ParticlesNumpy(Particles):
 
         nr = r / abs(r)
 
-        F = - (coulumb_k * abs(r ** -2) - repulshion_k * abs(r ** -1)) * nr
+        F = - func(r) * nr
 
         for i in range(pos.size):
             F[i][i] = 0

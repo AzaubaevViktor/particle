@@ -2,7 +2,7 @@ from typing import Tuple
 
 import pygame
 import math
-from particle import Particles, force_func, Particle
+from particle import Particles, force_func, Particle, clean_F
 from particle_numpy import ParticlesNumpy
 
 
@@ -27,7 +27,7 @@ class World:
         self.font = pygame.font.SysFont('Arial', 25)
 
         self.screen = pygame.display.set_mode(self._size)
-        self.particles = ParticlesNumpy()
+        self.particles = Particles()
 
     @property
     def _size(self):
@@ -35,7 +35,7 @@ class World:
 
     def step(self):
         # calc forces
-        self.particles.calc_forces(force_func)
+        self.particles.calc_forces(clean_F)
         # set forces
         self.particles.step(self.dT, self.speed_k)
         # wall

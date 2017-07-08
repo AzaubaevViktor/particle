@@ -17,47 +17,8 @@ def normalize(z):
     return z / abs(z)
 
 
-def __F(r: float, charge: int):
-    coulumb = coulumb_k * charge / abs(r) ** 2
-    repulshion = repulshion_k / abs(r)
-
-    return coulumb - repulshion
-
-
-def precalc():
-
-    dr = 0.1
-    to = 200
-    data = [0 for _ in range(int(to / dr))]
-
-    for r in range(1, int(to / dr)):
-        data[r] = __F(r * dr, 1)
-
-    max_index = len(data)
-
-    def _F(p1: "Particle", p2: "Particle"):
-        r = p1.pos - p2.pos
-        ra = abs(r)
-        ra = dr if 0 == ra else ra
-
-        key_left = int(ra / dr)
-        key_right = key_left + 1
-
-        if 0 < key_left < max_index - 1:
-            dlk = ra - key_left * dr
-            drk = key_right * dr - ra
-            v = data[key_left] * dlk + data[key_right] * drk
-        elif 0 == key_left:
-            return -max_force
-        else:
-            v = __F(ra, 1)
-
-        return v * normalize(r)
-
-    return _F
-
-
-force_func = precalc()
+def clean_F(r: float, charge: int = 1):
+    return (coulumb_k * charge / abs(r) - repulshion_k) / abs(r)
 
 
 draw_k = 2
@@ -75,7 +36,8 @@ class Particles:
         :return:
         """
         for p1, p2 in combinations(self.list, 2):
-            F = func(p1, p2)
+            r = p1.pos - p2.pos
+            F = func(r) * normalize(r)
             self._F[p1][p2] = F
             self._F[p2][p1] = -F
 
