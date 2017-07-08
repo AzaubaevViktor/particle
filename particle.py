@@ -1,10 +1,8 @@
-import functools
 from itertools import combinations
 from typing import Callable, List
 
 stable_point = 5
-max_value = 1
-max_force = 10
+max_value = 2
 
 repulshion_k = 4 * stable_point * max_value
 coulumb_k = repulshion_k * stable_point
@@ -20,9 +18,6 @@ def normalize(z):
 
 def force_func(r: float, charge: int = 1):
     return (coulumb_k * charge / abs(r) - repulshion_k) / abs(r)
-
-
-draw_k = 2
 
 
 class Particles:

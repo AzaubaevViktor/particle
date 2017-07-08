@@ -27,7 +27,7 @@ class World:
         self.font = pygame.font.SysFont('Arial', 25)
 
         self.screen = pygame.display.set_mode(self._size)
-        self.particles = Particles()
+        self.particles = ParticlesNumpy()
 
     @property
     def _size(self):
@@ -42,11 +42,11 @@ class World:
         # self.particles.wall(self.width, self.height)
 
     def particle_color(self, particle: Particle):
-        speed_d = abs(particle.speed)
-        force_d = abs(particle.F) * 10
-        R = 255 - force_d
-        G = 255 - speed_d
-        B = 255 - speed_d - force_d
+        speed_c = abs(particle.speed)
+        force_c = abs(particle.F) * 5
+        R = max(128, 255 - force_c)
+        G = max(128, 255 - speed_c)
+        B = 255 - force_c - speed_c
         return tuple(int(max(0, component)) for component in (R, G, B))
 
     def draw(self):
@@ -85,6 +85,7 @@ class RectGenerator:
     def __init__(self, start: complex, end:complex, density: float, speed: complex):
         self.start = start
         self.end = end
+        self.density = density
         self.step = 1 / density
         self.speed = speed
 
@@ -98,11 +99,29 @@ class RectGenerator:
             x += self.step
 
 
+class Rect6Generator(RectGenerator):
+    def __iter__(self):
+        size = 1 / self.density
+
+        r = self.end - self.start
+
+        height = size * 2
+        vert = height * 3 / 4
+        width = 3 ** 0.5 / 2 * height
+        horiz = width
+
+        for x in range(int(r.real // size) + 1):
+            for y in range(int(r.imag // size)):
+                yield Particle(
+                    self.start + (x * horiz + (- (x % 2) * size + y * height) * 1j),
+                    speed=self.speed
+                )
+
+                print(x * height + y * width * 1j)
+
+
 class Circle4Generator:
-    sin60 = 3 ** 0.5 * 0.5
-    cos60 = 0.5
-    sin30 = cos60
-    cos30 = sin60
+    generator_class = RectGenerator
 
     def __init__(self,
                  center: complex,
@@ -117,8 +136,11 @@ class Circle4Generator:
 
     def __iter__(self):
         diag = self.diameter * (1 + 1j)
-        r = RectGenerator(self.center - diag, self.center + diag, self.density, self.speed_linear)
+        r = self.generator_class(self.center - diag, self.center + diag, self.density, self.speed_linear)
         for particle in r:
-            if abs(particle.pos - self.center) < self.diameter:
+            if abs(particle.pos - self.center) <= self.diameter:
                 yield particle
 
+
+class Circle6Generator(Circle4Generator):
+    generator_class = Rect6Generator

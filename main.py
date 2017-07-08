@@ -2,36 +2,39 @@ import sys
 import time
 import pygame
 
-from world import World, SingleGenerator, RectGenerator, Circle4Generator
+from world import World, SingleGenerator, RectGenerator, Circle4Generator, \
+    Circle6Generator, Rect6Generator
 
 world = World(
-    friction=0
+    friction=0.1,
+    dT=0.01,
+    draw_k=2,
 )
 
 world.add_particles(
-    SingleGenerator(100+100j, 1)
+    SingleGenerator(500+100j, 1)
 )
 
 world.add_particles(
-    SingleGenerator(200 + 200j, -2)
+    SingleGenerator(500 + 200j, -2)
 )
 
 
 world.add_particles(
-    Circle4Generator(
-        500 + 500j,
-        10,
-        0.5,
-        30
+    Circle6Generator(
+        200 + 200j,
+        15,
+        0.4,
+        0
     )
 )
 
 world.add_particles(
-    Circle4Generator(
-        700 + 500j,
-        10,
-        0.8,
-        -30
+    Circle6Generator(
+        700 + 300j,
+        6,
+        1,
+        0
     )
 )
 
