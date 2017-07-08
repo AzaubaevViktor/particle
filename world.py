@@ -1,33 +1,61 @@
-from typing import Tuple
+import math
 
 import pygame
-import math
+
 from particle import Particles, force_func, Particle, force_func
 from particle_numpy import ParticlesNumpy
 
 
+def c2t(c: complex) -> tuple:
+    return c.real, c.imag
+
+
+def t2c(t: tuple) -> complex:
+    return t[0] + t[1] * 1j
+
+
+def setin_factory(_min:float, _max:float):
+    def f(value: float) -> float:
+        return max(min(_max, value), _min)
+    return f
+
+
 class World:
+    max_grid_lines = 15
+
     def __init__(
             self,
             width=1800,
             height=1000,
             dT=0.05,
-            draw_k=1,
+            zoom=1,
             friction=0.01
     ):
         self.width = width
         self.height = height
         self.dT = dT
-        self.draw_k = draw_k
-        self.speed_k = 1 - friction
+        self._zoom = zoom  # px by 1
+        self.friction = friction
+
+        self.pov = self.width / 2 + self.height / 2 *1j
 
         pygame.init()
 
         pygame.display.set_caption('Particle Simulator')
-        self.font = pygame.font.SysFont('Arial', 25)
+        self.fps_font = pygame.font.SysFont('Arial', 25)
+        self.grid_font = pygame.font.SysFont('Verdana', min(min(self.height, self.width) // 80, 12))
 
         self.screen = pygame.display.set_mode(self._size)
         self.particles = ParticlesNumpy()
+
+    def change_zoom(self, d_zoom: float, monitor_pos: complex):
+        if self._zoom + d_zoom > 0:
+            self.pov = d_zoom * (self.pov-monitor_pos) / self._zoom + self.pov
+            self._zoom += d_zoom
+
+    @property
+    def zoom(self):
+        return self._zoom
 
     @property
     def _size(self):
@@ -37,7 +65,7 @@ class World:
         # calc forces
         self.particles.calc_forces(force_func)
         # set forces
-        self.particles.step(self.dT, self.speed_k)
+        self.particles.step(self.dT, self.friction)
         # wall
         # self.particles.wall(self.width, self.height)
 
@@ -50,22 +78,84 @@ class World:
         return tuple(int(max(0, component)) for component in (R, G, B))
 
     def draw(self):
-        self.screen.fill((0, 0, 0))
-
         for particle in self.particles.particles():
+            pos = self.pov + particle.pos * self.zoom
+            x = int(round(pos.real))
+            y = int(round(pos.imag))
+
             pygame.draw.circle(
                 self.screen,
                 self.particle_color(particle),
-                (int(round(particle.pos.real * self.draw_k)),
-                 int(round(particle.pos.imag * self.draw_k))),
+                (x, y),
                 2
             )
 
+    def m2w(self, monitor_coord: complex) -> complex:
+        return (monitor_coord - self.pov) / self.zoom
+
+    def w2m(self, world_coord: complex) -> complex:
+        return world_coord * self.zoom + self.pov
+
+    def draw_grid(self):
+        center = t2c((self.width / 2, self.height / 2))
+
+        setin_y = setin_factory(0, self.height - 20)
+        setin_x = setin_factory(0, self.width - 20)
+
+        width_in = self.width / self.zoom
+        height_in = self.height / self.zoom
+
+        x_res = 10 ** -math.floor(
+            -math.log(width_in / self.max_grid_lines, self.max_grid_lines))
+        y_res = 10 ** -math.floor(
+            -math.log(height_in / self.max_grid_lines, self.max_grid_lines))
+
+        res = min(x_res, y_res)
+
+        d_i = self.pov / self.zoom / res
+
+        # X
+
+        x_count = int(width_in / res)
+        dx_i = int(d_i.real)
+
+        for x_i in range(-dx_i - 1,  x_count - dx_i + 1):
+            x = x_i * self.zoom * res + self.pov.real
+
+            color = (200, 200, 200) if x_i == 0 else (50, 50, 50)
+
+            pygame.draw.line(self.screen,
+                             color,
+                             (x, 0),
+                             (x, self.height), )
+            self._grid_write(x_i * res, (x + 2, setin_y(self.pov.imag + 2)))
+
+        # Y
+
+        y_count = int(height_in // res)
+        dy_i = int(d_i.imag)
+
+        for y_i in range(-dy_i - 1, y_count - dy_i + 1):
+            y = y_i * self.zoom * res + self.pov.imag
+
+            color = (200, 200, 200) if y_i == 0 else (50, 50, 50)
+
+            pygame.draw.line(self.screen,
+                             color,
+                             (0, y),
+                             (self.width, y), )
+            self._grid_write(y_i * res, (setin_x(self.pov.real + 2), y + 2))
+
     def update(self):
         pygame.display.flip()
+        self.screen.fill((0, 0, 0))
 
     def write(self, text, pos=(0, 0), color=(255, 255, 255)):
-        self.screen.blit(self.font.render(str(text), True, color),
+        self.screen.blit(self.fps_font.render(str(text), True, color),
+                         pos)
+
+    def _grid_write(self, text, pos, color=(255, 255, 255)):
+        self.screen.blit(self.grid_font.render(str(text), True, color),
                          pos)
 
     def add_particles(self, generator):

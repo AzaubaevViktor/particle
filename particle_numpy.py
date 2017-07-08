@@ -45,10 +45,9 @@ class ParticlesNumpy(Particles):
 
         self.F = np.sum(F, axis=1)
 
-    def step(self, dT, speed_k):
+    def step(self, dT, friction):
         self.speed += self.F * dT
-        self.speed *= speed_k
-
+        self.speed *= 1 - friction
         self.pos += self.speed * dT
 
     def particles(self) -> typing.Iterator[Particle]:
