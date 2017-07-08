@@ -2,7 +2,7 @@ from typing import Tuple
 
 import pygame
 import math
-from particle import Particles, force_func, Particle, clean_F
+from particle import Particles, force_func, Particle, force_func
 from particle_numpy import ParticlesNumpy
 
 
@@ -35,7 +35,7 @@ class World:
 
     def step(self):
         # calc forces
-        self.particles.calc_forces(clean_F)
+        self.particles.calc_forces(force_func)
         # set forces
         self.particles.step(self.dT, self.speed_k)
         # wall

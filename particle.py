@@ -1,3 +1,4 @@
+import functools
 from itertools import combinations
 from typing import Callable, List
 
@@ -17,7 +18,7 @@ def normalize(z):
     return z / abs(z)
 
 
-def clean_F(r: float, charge: int = 1):
+def force_func(r: float, charge: int = 1):
     return (coulumb_k * charge / abs(r) - repulshion_k) / abs(r)
 
 
