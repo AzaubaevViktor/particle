@@ -1,7 +1,8 @@
 from collections import Callable
 
 import numpy as np
-from numpy.linalg import linalg
+
+import typing
 
 from particle import Particles, Particle, \
     coulumb_k, repulshion_k
@@ -50,11 +51,15 @@ class ParticlesNumpy(Particles):
 
         self.pos += self.speed * dT
 
-    def __iter__(self):
+    def particles(self) -> typing.Iterator[Particle]:
         for pos, F, speed in zip(self.pos, self.F, self.speed):
             p = Particle(pos, speed=speed)
             p.F = F
             yield p
+
+    def __iter__(self):
+        for pos, F, speed in zip(self.pos, self.F, self.speed):
+            yield pos.real, pos.imag, F, speed
 
 
 

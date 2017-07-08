@@ -1,3 +1,5 @@
+from typing import Tuple
+
 import pygame
 import math
 from particle import Particles, force_func, Particle
@@ -20,6 +22,9 @@ class World:
         self.speed_k = 1 - friction
 
         pygame.init()
+
+        pygame.display.set_caption('Particle Simulator')
+        self.font = pygame.font.SysFont('Arial', 25)
 
         self.screen = pygame.display.set_mode(self._size)
         self.particles = ParticlesNumpy()
@@ -47,7 +52,7 @@ class World:
     def draw(self):
         self.screen.fill((0, 0, 0))
 
-        for particle in self.particles:
+        for particle in self.particles.particles():
             pygame.draw.circle(
                 self.screen,
                 self.particle_color(particle),
@@ -56,7 +61,12 @@ class World:
                 2
             )
 
+    def update(self):
         pygame.display.flip()
+
+    def write(self, text, pos=(0, 0), color=(255, 255, 255)):
+        self.screen.blit(self.font.render(str(text), True, color),
+                         pos)
 
     def add_particles(self, generator):
         self.particles.add(generator)

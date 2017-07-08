@@ -123,9 +123,12 @@ class Particles:
             particle.pos = x + y * 1j
             particle.speed = vx + vy * 1j
 
+    def particles(self):
+        return iter(self.list)
 
     def __iter__(self):
-        return iter(self.list)
+        for p in self.list:
+            yield p.pos.real, p.pos.imag, p.F, p.speed
 
 
 class Particle:
