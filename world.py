@@ -1,6 +1,7 @@
 import pygame
 import math
 from particle import Particles, force_func, Particle
+from particle_numpy import ParticlesNumpy
 
 
 class World:
@@ -21,7 +22,7 @@ class World:
         pygame.init()
 
         self.screen = pygame.display.set_mode(self._size)
-        self.particles = Particles()
+        self.particles = ParticlesNumpy()
 
     @property
     def _size(self):
@@ -50,8 +51,8 @@ class World:
             pygame.draw.circle(
                 self.screen,
                 self.particle_color(particle),
-                (round(particle.pos.real * self.draw_k),
-                 round(particle.pos.imag * self.draw_k)),
+                (int(round(particle.pos.real * self.draw_k)),
+                 int(round(particle.pos.imag * self.draw_k))),
                 2
             )
 
